@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lista whatsapp</title>
+  </head>
+  <style>
+    ul {
+      list-style-type: none;
+    }
+    .espera {
+      background-color: rgba(120, 255, 115, 0.226);
+    }
+    .salida {
+      background-color: rgba(255, 115, 115, 0.226);
+    }
+  </style>
+  <body>
+    <div id="qr-container">
+      <img src="" alt="" />
+    </div>
+    <h1>Lista de ubicaciones</h1>
+    <ul id="locationList"></ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      function cargarDatosDesdeJSON() {
+        const locationList = document.getElementById("locationList");
+        locationList.innerHTML = "";
+        const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+        const today = new Date().toLocaleDateString("es-CL", options).replace(/\//g, "-");
+
+        fetch("/data")
+          .then((response) => response.json())
+          .then((datos) => {
+            console.log(datos);
+            const datosHoy = datos.filter((message) => message.fecha.startsWith(today));
+            datosHoy.forEach((message) => {
+              const listItem = document.createElement("li");
+              listItem.textContent = message.nombre;
+              if (message.enCola) {
+                listItem.classList.add("espera");
+              } else {
+                listItem.classList.add("salida");
+              }
+              listItem.id = message.telefono;
+              locationList.appendChild(listItem);
+            });
+          })
+          .catch((error) => {
+            console.error("Error al cargar el archivo JSON:", error);
+          });
+      }
+
+      window.onload = cargarDatosDesdeJSON;
+
+      socket.on("newMessage", (message) => {
+        cargarDatosDesdeJSON();
+      });
+
+      socket.on("cargaOp", (message) => {
+        console.log("message");
+        if (message) {
+          cargarDatosDesdeJSON();
+        }
+      });
+
+      socket.on("qr", (qr) => {
+        // Create an image element with the QR code
+        const qrContainer = document.getElementById("qr-container");
+        qrContainer.innerHTML = "";
+        const qrImage = document.createElement("img");
+        qrImage.src = `/${qr}`;
+
+        // // Append the image to the container
+        qrContainer.appendChild(qrImage);
+      });
+    </script>
+  </body>
+</html>
