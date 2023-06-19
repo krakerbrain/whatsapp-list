@@ -14,7 +14,7 @@ const crearOActualizarJSON = require("./crearJson.js");
 const verificaGrupo = require("./verificaGrupo.js");
 const modificarEnCola = require("./modificaJson.js");
 const QRCode = require("qrcode");
-
+console.log("principal", __dirname);
 const HTML_DIR = path.join(__dirname, "../public");
 const JSON_FILE_PATH = path.join(__dirname, "../archivo.json");
 app.use(express.static(HTML_DIR));
