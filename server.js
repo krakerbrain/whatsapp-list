@@ -15,15 +15,15 @@ const verificaGrupo = require("./verificaGrupo.js");
 const modificarEnCola = require("./modificaJson.js");
 const QRCode = require("qrcode");
 
-const HTML_DIR = path.join(__dirname, "../whatsapp-list/public");
-const JSON_FILE_PATH = path.join(__dirname, "../whatsapp-list/archivo.json");
+const HTML_DIR = path.join(__dirname, "../public");
+const JSON_FILE_PATH = path.join(__dirname, "../archivo.json");
 app.use(express.static(HTML_DIR));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // ruta para el archivo HTML con los inputs
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "/../whatsapp-list/public/index.html"));
+  res.sendFile(path.join(__dirname, "/../public/index.html"));
 });
 
 // Ruta para obtener el archivo JSON
@@ -37,7 +37,7 @@ const client = new Client({
 
 client.on("qr", (qr) => {
   QRCode.toFile(
-    path.join(__dirname, "/../whatsapp-list/public/code.png"),
+    path.join(__dirname, "/../public/code.png"),
     qr,
     {
       errorCorrectionLevel: "H",
