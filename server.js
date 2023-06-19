@@ -6,7 +6,6 @@ const io = require("socket.io")(http);
 const path = require("path");
 const bodyParser = require("body-parser");
 const qrcode = require("qrcode-terminal");
-const puppeteer = require("puppeteer");
 
 const port = process.env.PORT || 3000;
 const { Client, LocalAuth, GroupNotificationTypes } = require("whatsapp-web.js");
@@ -55,7 +54,7 @@ client.on("qr", (qr) => {
 
 client.on("ready", async () => {
   // Lanzar Puppeteer en modo sin cabeza
-  const browser = await puppeteer.launch({ headless: "new" });
+
   console.log("Cliente listo!");
 });
 
