@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 
 // ruta para el archivo HTML con los inputs
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/index.html"));
+  res.sendFile("/opt/render/project/public/index.html");
 });
 
 // Ruta para obtener el archivo JSON
@@ -39,7 +39,7 @@ const client = new Client({
 
 client.on("qr", (qr) => {
   QRCode.toFile(
-    path.join(__dirname, "../public/code.png"),
+    path.join("/opt/render/project/public/code.png"),
     qr,
     {
       errorCorrectionLevel: "H",
