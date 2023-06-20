@@ -6,6 +6,7 @@ const io = require("socket.io")(http);
 const path = require("path");
 const bodyParser = require("body-parser");
 const qrcode = require("qrcode-terminal");
+const fs = require("fs");
 
 const port = process.env.PORT || 3000;
 const { Client, LocalAuth, GroupNotificationTypes } = require("whatsapp-web.js");
@@ -15,22 +16,22 @@ const verificaGrupo = require("./verificaGrupo.js");
 const modificarEnCola = require("./modificaJson.js");
 const QRCode = require("qrcode");
 
-console.log("principal", path.join(__dirname, "./index.html"));
+// Directorio de archivos estáticos
+const PUBLIC_DIR = path.join(__dirname, "public");
+const QR_CODE_DIR = path.join(PUBLIC_DIR, "qrcode");
 
-const HTML_DIR = path.join(__dirname, "/../");
-const JSON_FILE_PATH = path.join(__dirname, "./archivo.json");
-app.use(express.static(HTML_DIR));
+app.use(express.static(PUBLIC_DIR));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// ruta para el archivo HTML con los inputs
+// Ruta para el archivo HTML con los inputs
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "./index.html"));
+  res.sendFile(path.join(PUBLIC_DIR, "index.html"));
 });
 
 // Ruta para obtener el archivo JSON
 app.get("/data", (req, res) => {
-  res.sendFile(JSON_FILE_PATH);
+  res.sendFile(path.join(__dirname, "archivo.json"));
 });
 
 const client = new Client({
@@ -38,16 +39,18 @@ const client = new Client({
 });
 
 client.on("qr", (qr) => {
+  const qrCodeFilePath = path.join(QR_CODE_DIR, "code.png");
+
   QRCode.toFile(
-    path.join(__dirname, "./code.png"),
+    qrCodeFilePath,
     qr,
     {
       errorCorrectionLevel: "H",
     },
     function (err) {
       if (err) throw err;
-      // console.log("QR code saved!");
-      io.emit("qr", "code.png");
+
+      io.emit("qr", "qrcode/code.png");
     }
   );
 
@@ -55,8 +58,6 @@ client.on("qr", (qr) => {
 });
 
 client.on("ready", async () => {
-  // Lanzar Puppeteer en modo sin cabeza
-
   console.log("Cliente listo!");
 });
 
@@ -64,11 +65,10 @@ client.on("message", (msg) => {
   const grupo = verificaGrupo(msg);
 
   const author = msg._data.author;
-  const phoneNumber = author.split("@")[0]; // Extraer el número de teléfono del formato "56941101197@c.us"
+  const phoneNumber = author.split("@")[0];
   const contact = csvjson.find((item) => item.number == phoneNumber);
 
-  if (grupo == "ubicacion") {
-    // Buscar el número de teléfono en el archivo JSON
+  if (grupo === "ubicacion") {
     console.log("contacto", contact);
     if (contact) {
       const mensaje = {
@@ -76,11 +76,10 @@ client.on("message", (msg) => {
         phoneNumber: phoneNumber,
       };
 
-      // Emitir el mensaje recibido a todos los clientes conectados
       io.emit("newMessage", mensaje);
       crearOActualizarJSON(contact.nombre, phoneNumber);
     }
-  } else if (grupo == "op") {
+  } else if (grupo === "op") {
     modificarEnCola(phoneNumber)
       .then((resultado) => {
         if (resultado === true) {
@@ -93,12 +92,14 @@ client.on("message", (msg) => {
   }
 });
 
-// Exportar el objeto 'io' para poder utilizarlo en otros archivos
 module.exports = io;
 
-// Exportar la función 'initializeClient' para iniciar el cliente de WhatsApp
 module.exports.initializeClient = () => {
-  // Iniciamos el servidor en el puerto 3000
+  // Crear directorio para los códigos QR si no existe
+  if (!fs.existsSync(QR_CODE_DIR)) {
+    fs.mkdirSync(QR_CODE_DIR, { recursive: true });
+  }
+
   http.listen(port, () => {
     console.log("Servidor iniciado en el puerto " + port);
     client.initialize();
