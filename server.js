@@ -18,7 +18,7 @@ const QRCode = require("qrcode");
 console.log("principal", path.join(__dirname, "./index.html"));
 
 const HTML_DIR = path.join(__dirname, "/../");
-const JSON_FILE_PATH = path.join(__dirname, "/../archivo.json");
+const JSON_FILE_PATH = path.join(__dirname, "./archivo.json");
 app.use(express.static(HTML_DIR));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -39,7 +39,7 @@ const client = new Client({
 
 client.on("qr", (qr) => {
   QRCode.toFile(
-    path.join(__dirname, "/../public/code.png"),
+    path.join(__dirname, "./code.png"),
     qr,
     {
       errorCorrectionLevel: "H",
