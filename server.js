@@ -15,9 +15,9 @@ const verificaGrupo = require("./verificaGrupo.js");
 const modificarEnCola = require("./modificaJson.js");
 const QRCode = require("qrcode");
 
-console.log("principal", path.join(__dirname, "/../public"));
+console.log("principal", path.join(__dirname, "./index.html"));
 
-const HTML_DIR = path.join(__dirname, "/../public/");
+const HTML_DIR = path.join(__dirname, "/../");
 const JSON_FILE_PATH = path.join(__dirname, "/../archivo.json");
 app.use(express.static(HTML_DIR));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 
 // ruta para el archivo HTML con los inputs
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "/../public/index.html"));
+  res.sendFile(path.join(__dirname, "./index.html"));
 });
 
 // Ruta para obtener el archivo JSON
